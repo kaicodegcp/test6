@@ -1,0 +1,27 @@
+mproving Efficiency and Compliance:
+The EAP Strategic Solutions team successfully leveraged the Citi-approved 3rd Party Image Ingestion Pipeline (3PIP) to onboard Cloudera Data Services (CDS) container images. These approved Cloudera images are now automatically ingested, validated, and published into Citi’s artifact ecosystem, enabling streamlined and compliant deployments for Cloudera CDP clusters.
+
+This enhancement ensures that all Cloudera CDS installations use security-vetted, approved images while adhering to Citi’s enterprise container governance standards.
+
+Key Achievements:
+Integrated CDS Cloudera images using the Citi 3PIP automated pipeline.
+
+Validated the image onboarding process through automated compliance checks, scanning, and artifact repository ingestion.
+
+Ensured image traceability and approval workflows for future Cloudera CDS deployments in SDLC and production environments.
+
+Benefits to the Team:
+Eliminates manual image ingestion effort by leveraging the automated 3PIP workflow.
+
+Ensures compliance by using Citi-approved and security-verified container images.
+
+Accelerates Cloudera CDS deployment readiness across SDLC and production environments.
+
+Enhances governance by enabling traceable, version-controlled image lifecycle management.
+
+Next Steps:
+Enable automated triggers for future Cloudera image updates through 3PIP.
+
+Validate integrated images with CDS installation automation scripts for end-to-end deployment.
+
+Document best practices for CDS image onboarding and deployment automation.
