@@ -61,3 +61,13 @@ Edit
 oc patch serviceaccount default -n taco-cds-h15 \
   --type='json' \
   -p='[{"op":"add","path":"/imagePullSecrets/-","value":{"name":"cdp-private-installer-docker-pull-secret"}}]'
+
+
+
+---
+for sa in $(oc get sa -n taco-cds-h15 -o name); do
+  oc patch $sa -n taco-cds-h15 \
+    --type=merge \
+    -p "{\"imagePullSecrets\":[{\"name\":\"cdp-private-installer-docker-pull-secret\"}]}"
+done
+
