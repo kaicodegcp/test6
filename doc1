@@ -1,0 +1,15 @@
+oc patch sa vault-auth -n taco-cds-h15 \
+  --type='json' \
+  -p='[{"op":"add","path":"/imagePullSecrets/-","value":{"name":"cdp-private-installer-docker-pull-secret"}}]'
+
+  oc get pods -n rook-ceph
+oc get cephcluster -n rook-ceph
+oc get pvc -n taco-cds-h15
+
+
+  oc describe pod -n rook-ceph rook-ceph-operator-xxxx
+
+  oc set image deployment/rook-ceph-operator rook-ceph-operator=<correct-image> -n rook-ceph
+oc secrets link default <your-pull-secret> --for=pull -n rook-ceph
+
+  oc get pvc -n taco-cds-h15
