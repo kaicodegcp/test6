@@ -13,3 +13,51 @@ oc get pvc -n taco-cds-h15
 oc secrets link default <your-pull-secret> --for=pull -n rook-ceph
 
   oc get pvc -n taco-cds-h15
+
+
+
+
+How to Fix
+Step 1: Patch All Service Accounts in Namespace
+bash
+Copy
+Edit
+for sa in $(oc get sa -n taco-cds-h15 -o name); do
+  oc patch $sa -n taco-cds-h15 \
+    --type='json' \
+    -p='[{"op":"add","path":"/imagePullSecrets/-","value":{"name":"cdp-private-installer-docker-pull-secret"}}]'
+done
+Step 2: Ensure Secret Exists
+Verify secret:
+
+bash
+Copy
+Edit
+oc get secret cdp-private-installer-docker-pull-secret -n taco-cds-h15
+If missing, create it using your credentials:
+
+bash
+Copy
+Edit
+oc create secret docker-registry cdp-private-installer-docker-pull-secret \
+  --docker-server=docker-cto-dev-local.artifactrepository.citigroup.net \
+  --docker-username=eap_dev \
+  --docker-password='<PASSWORD>' \
+  --docker-email=dummy@citi.com \
+  -n taco-cds-h15
+Step 3: Restart Vault Pod
+bash
+Copy
+Edit
+oc delete pod vault-0 -n taco-cds-h15 --ignore-not-found
+Installer will retry automatically, or you can click Retry in Cloudera UI.
+
+Optional: Patch Future Service Accounts Automatically
+If you want every service account created later to automatically use this secret:
+
+bash
+Copy
+Edit
+oc patch serviceaccount default -n taco-cds-h15 \
+  --type='json' \
+  -p='[{"op":"add","path":"/imagePullSecrets/-","value":{"name":"cdp-private-installer-docker-pull-secret"}}]'
