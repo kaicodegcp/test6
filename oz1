@@ -91,3 +91,33 @@ mount -a
 
 echo "=== Final df -h ==="
 df -h | grep -E "$OZONE_MOUNT_BASE|/var/app|/opt/cloudera"
+
+
+
+Check if /dev/sdk or /dev/sdl is mounted or in use
+bash
+Copy
+Edit
+lsblk /dev/sdk
+lsblk /dev/sdl
+mount | grep sdk
+mount | grep sdl
+pvs | grep -E "sdk|sdl"
+2. Force remove old LVM signature
+bash
+Copy
+Edit
+vgchange -an  # deactivate any VG
+pvremove -f /dev/sdk
+pvremove -f /dev/sdl
+wipefs -a /dev/sdk
+wipefs -a /dev/sdl
+dd if=/dev/zero of=/dev/sdk bs=1M count=10 status=none
+dd if=/dev/zero of=/dev/sdl bs=1M count=10 status=none
+3. Rerun your script
+Now that gdisk is installed and signatures cleared, rerun:
+
+bash
+Copy
+Edit
+./oz1.sh
