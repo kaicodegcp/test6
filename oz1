@@ -1,0 +1,64 @@
+#!/bin/bash
+set -euo pipefail
+
+# ========= CONFIG =========
+VG_NAME="datavg"
+MOUNT_BASE="/data"
+HADOOP_DIR="hadoop-ozone/datanode/data"
+DRIVES=(
+  # Device : MountIndex : SizeGB
+  "/dev/sd[g-z] 1 7680"
+  "/dev/sd[aa-ab] 2 7680"
+  "/dev/sd[ac-ad] 3 7680"
+  # Add all remaining drives mapping according to your hardware names
+)
+# ==========================
+
+echo "WARNING: This will wipe existing filesystems!"
+read -p "Are you sure? (yes/no): " CONFIRM
+[[ "$CONFIRM" == "yes" ]] || exit 1
+
+echo "Unmounting any existing ozone mounts..."
+for i in $(grep -E "$MOUNT_BASE" /proc/mounts | awk '{print $2}'); do
+  umount -f "$i" || true
+done
+
+echo "Removing old fstab entries..."
+sed -i.bak "/$MOUNT_BASE/d" /etc/fstab
+
+echo "Wiping old LVM & filesystem..."
+for d in ${DRIVES[@]}; do
+  DEV=$(echo $d | awk '{print $1}')
+  wipefs -a $DEV
+done
+
+echo "Creating Volume Group $VG_NAME..."
+vgremove -f $VG_NAME || true
+vgcreate $VG_NAME $(for d in ${DRIVES[@]}; do echo $(echo $d | awk '{print $1}'); done)
+
+INDEX=1
+for d in ${DRIVES[@]}; do
+  SIZE=$(echo $d | awk '{print $3}')
+  LV_NAME="lv_data${INDEX}"
+  MOUNT_DIR="${MOUNT_BASE}/${INDEX}/${HADOOP_DIR}"
+
+  echo "Creating LV $LV_NAME of size ${SIZE}G..."
+  lvcreate -L ${SIZE}G -n $LV_NAME $VG_NAME
+
+  echo "Creating filesystem on $LV_NAME..."
+  mkfs.ext4 -m 0 -F /dev/${VG_NAME}/${LV_NAME}
+
+  echo "Creating mount dir $MOUNT_DIR..."
+  mkdir -p $MOUNT_DIR
+
+  echo "Updating /etc/fstab..."
+  echo "/dev/${VG_NAME}/${LV_NAME} $MOUNT_DIR ext4 defaults,noatime 0 0" >> /etc/fstab
+
+  INDEX=$((INDEX+1))
+done
+
+echo "Mounting all..."
+mount -a
+
+echo "Filesystem layout created successfully!"
+df -h | grep "$MOUNT_BASE"
