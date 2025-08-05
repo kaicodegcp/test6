@@ -121,3 +121,34 @@ bash
 Copy
 Edit
 ./oz1.sh
+
+
+
+Deactivate the specific VGs (not all)
+bash
+Copy
+Edit
+vgchange -an datavg1
+vgchange -an datavg2
+2. Remove LVs and PVs associated with /dev/sdk and /dev/sdl
+bash
+Copy
+Edit
+lvremove -f datavg1/var_app_log
+lvremove -f datavg1/var_app_lib
+lvremove -f datavg2/opt_cloudera
+lvremove -f datavg2/opt_Cloudera
+
+vgremove -f datavg1
+vgremove -f datavg2
+
+pvremove -f /dev/sdk
+pvremove -f /dev/sdl
+3. Clear old signatures
+bash
+Copy
+Edit
+wipefs -a /dev/sdk
+wipefs -a /dev/sdl
+dd if=/dev/zero of=/dev/sdk bs=1M count=10 status=none
+dd if=/dev/zero of=/dev/sdl bs=1M count=10 status=none
