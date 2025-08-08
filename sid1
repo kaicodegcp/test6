@@ -1,0 +1,30 @@
+Standardized SWIDTAG Creation for Citiconda Using Ansible Automation
+Description
+Strengthening Software Asset Management and Compliance:
+The EAP Strategic Solutions team developed and committed an Ansible automation (cti_rhel_eapbigdata_bdeng_vm_maintenance_Citiconda_swidtag.yml) to streamline the deployment of SWIDTAGs for Citiconda software across Citi-managed Linux nodes. This automation supports both Citiconda39 (Python 3.9) and Citiconda3 (Python 3.7) installations across application servers and Cloudera CDP cluster nodes.
+
+By integrating SWIDTAG creation into the automation framework, this effort enhances software identification, asset tracking, and licensing compliance across SDLC environments.
+
+Key Achievements:
+Developed an Ansible playbook that identifies OS versions and dynamically includes SWIDTAG parcel variables for RHEL7 and RHEL8.
+
+Deployed SWIDTAGs for Citiconda39 and Citiconda3 across both application and Cloudera-managed hosts.
+
+Integrated the Citiconda role to support scalable and reusable tagging operations.
+
+Benefits to the Team:
+Improves visibility of installed software packages through automated tagging.
+
+Enables software compliance tracking aligned with Citi governance policies.
+
+Reduces manual efforts for SWIDTAG generation and deployment across environments.
+
+Provides a reusable automation framework for future tagging requirements.
+
+Next Steps:
+Expand the Ansible role to support SWIDTAGs for additional EAP-managed software components.
+
+Integrate this SWIDTAG deployment into VM provisioning pipelines.
+
+Validate automation across edge cases (e.g., minimal OS versions, custom Python installs).
+
