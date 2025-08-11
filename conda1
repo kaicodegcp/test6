@@ -1,0 +1,53 @@
+
+- name: EAP Citiconda swidtag creation (parcel-presence based)
+  hosts: all
+  become: yes
+  gather_facts: false
+
+  vars:
+    parcels_dir: /opt/cloudera/parcels
+    variants:
+      - citiconda39
+      - citiconda3
+
+  tasks:
+    - name: Check for Citiconda parcels (follow symlinks)
+      ansible.builtin.stat:
+        path: "{{ parcels_dir }}/{{ item }}"
+        follow: yes
+      loop: "{{ variants }}"
+      register: parcel_checks
+
+    - name: Build list of detected variants
+      ansible.builtin.set_fact:
+        detected_variants: "{{ parcel_checks.results
+                                | selectattr('stat.exists', 'defined')
+                                | selectattr('stat.exists')
+                                | map(attribute='item')
+                                | list }}"
+
+    - name: No Citiconda present — nothing to do
+      ansible.builtin.debug:
+        msg: "No citiconda3 or citiconda39 present under {{ parcels_dir }}. Skipping SWID tag deployment."
+      when: detected_variants | length == 0
+
+    - name: Deploy SWID tag(s) per detected Citiconda variant
+      when: detected_variants | length > 0
+      block:
+        - name: Load SWID tag vars for {{ item }}
+          ansible.builtin.include_vars:
+            file: "vars/{{ item }}.yml"
+          loop: "{{ detected_variants }}"
+          loop_control:
+            loop_var: cit_variant
+
+        - name: Run Citiconda role for {{ cit_variant }}
+          ansible.builtin.include_role:
+            name: Citiconda
+          vars:
+            # Optional: expose which variant is being processed to the role
+            citiconda_variant: "{{ cit_variant }}"
+          loop: "{{ detected_variants }}"
+          loop_control:
+            loop_var: cit_variant
+          tags: ['swidtag','citiconda']
