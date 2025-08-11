@@ -1,0 +1,47 @@
+---
+- name: EAP Citiconda swidtag creation
+  hosts: all
+  become: yes
+  become_user: root
+  gather_facts: true
+
+  tasks:
+    - name: Check for citiconda39 parcel
+      stat:
+        path: /opt/cloudera/parcels/citiconda39
+        follow: yes
+      register: cc39
+
+    - name: Check for citiconda3 parcel
+      stat:
+        path: /opt/cloudera/parcels/citiconda3
+        follow: yes
+      register: cc3
+
+    # citiconda39
+    - name: Load vars for citiconda39
+      include_vars:
+        file: vars/citiconda39.yml
+      when: cc39.stat.exists | default(false)
+
+    - name: Deploy SWID tag for citiconda39
+      include_role:
+        name: Citiconda
+      when: cc39.stat.exists | default(false)
+
+    # citiconda3
+    - name: Load vars for citiconda3
+      include_vars:
+        file: vars/citiconda3.yml
+      when: cc3.stat.exists | default(false)
+
+    - name: Deploy SWID tag for citiconda3
+      include_role:
+        name: Citiconda
+      when: cc3.stat.exists | default(false)
+
+    # none found
+    - name: No Citiconda parcels present - skipping SWID deployment
+      debug:
+        msg: "No citiconda3 or citiconda39 under /opt/cloudera/parcels. Skipping."
+      when: not (cc39.stat.exists | default(false)) and not (cc3.stat.exists | default(false))
