@@ -1,0 +1,52 @@
+data datout.ercf_capital;
+  merge
+    datout.er_data_lnlevel_temp (in=a)
+
+    /* NEW table -> keep NEW names, then rename to OLD names */
+    netza1.ln_eom_pop_vw
+      ( keep   = fnm_ln_id ln_aqsn_dt bwr_grp_drvd_lprc_mncs_no ln_orgn_ltv_rtlv_rt ln_refi_ecd
+        rename = (
+          fnm_ln_id                 = fnma_ln
+          ln_aqsn_dt                = aqsn_dt
+          bwr_grp_drvd_lprc_mncs_no = fico
+          ln_orgn_ltv_rtlv_rt       = ltv
+          ln_refi_ecd               = refi_flg
+        )
+      );
+  by fnma_ln;   /* post-rename name */
+  if a;
+
+  /* ---- your existing logic below ---- */
+
+  length FICO_BUCKET $10;
+  if fico < 0          then FICO_BUCKET = "Missing";
+  else if fico < 620   then FICO_BUCKET = "0-620";
+  else if fico < 640   then FICO_BUCKET = "620-640";
+  else if fico < 660   then FICO_BUCKET = "640-660";
+  else if fico < 680   then FICO_BUCKET = "660-680";
+  else if fico < 700   then FICO_BUCKET = "680-700";
+  else if fico < 720   then FICO_BUCKET = "700-720";
+  else if fico < 740   then FICO_BUCKET = "720-740";
+  else if fico < 760   then FICO_BUCKET = "740-760";
+  else if fico < 780   then FICO_BUCKET = "760-780";
+  else if fico < 800   then FICO_BUCKET = "780-800";
+  else                      FICO_BUCKET = "800+";
+
+  length BUCKET_LTV $9;
+  if ltv*100 < 0        then BUCKET_LTV = "Missing";
+  else if ltv*100 < 60  then BUCKET_LTV = "0-60";
+  else if ltv*100 < 70  then BUCKET_LTV = "60-70";
+  else if ltv*100 < 80  then BUCKET_LTV = "70-80";
+  else if ltv*100 < 90  then BUCKET_LTV = "80-90";
+  else if ltv*100 < 95  then BUCKET_LTV = "90-95";
+  else                       BUCKET_LTV = "95+";
+
+  if refi_flg in ('R') then refi_new = 'R';
+
+  grid5 = cats(FICO_BUCKET,'|',BUCKET_LTV);
+
+  length aqsn_dtm $6;
+  if intck('month', aqsn_dt, aqsn_dt) < 0 then
+    aqsn_dtm = cats(year(aqsn_dt), put(month(aqsn_dt), z2.));
+  else aqsn_dtm = cats(year(aqsn_dt), put(month(aqsn_dt), z2.));
+run;
