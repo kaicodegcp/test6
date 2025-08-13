@@ -1,0 +1,132 @@
+Absolutely! You're looking to explore both Cloudera Data Engineering (CDE) and Cloudera Data Warehouse (CDW) on the Cloudera Data Services (CDS) platform, and specifically want to run Spark code using CDE. Below is a step-by-step guide for both CDE and CDW.
+
+✅ Part 1: Using Cloudera Data Engineering (CDE) to Run Spark Jobs
+🔧 Pre-requisites
+Your CDS cluster must have CDE enabled.
+
+You should have a virtual cluster (VC) running.
+
+Your browser should be able to reach the CDE URL.
+
+You must have access to CDE CLI or Jupyter/Workbench (optional).
+
+🚀 Steps to Run Spark Job in CDE (via CLI)
+Step 1: Access the CDE Console
+In the UI screenshot you posted, click Data Engineering.
+
+Select an available Virtual Cluster or create a new one.
+
+You need to give it a name and select a resource profile.
+
+Step 2: Install & Configure CDE CLI
+On your local machine (or cloud VM):
+
+bash
+Copy
+Edit
+# Download CDE CLI
+curl -O https://archive.cloudera.com/cde/cde-cli/latest/linux/cde
+chmod +x cde
+sudo mv cde /usr/local/bin/
+
+# Configure it to point to your VC
+cde config set-cluster --name cde-vc --domain https://<your-vc-endpoint>
+Example --domain could be something like: https://vc1.cde-console.yourdomain.net
+
+Step 3: Write a Sample Spark Job
+Create wordcount.py:
+
+python
+Copy
+Edit
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("wordcount").getOrCreate()
+text = spark.read.text("words.txt")
+words = text.selectExpr("explode(split(value, ' ')) as word")
+word_counts = words.groupBy("word").count()
+word_counts.show()
+Step 4: Upload the Script
+bash
+Copy
+Edit
+cde resource create --name spark-scripts
+cde resource upload --name spark-scripts --local-path wordcount.py
+Step 5: Run the Job
+bash
+Copy
+Edit
+cde job create --name wordcount-job \
+  --type spark \
+  --mount-1-resource spark-scripts \
+  --application-file wordcount.py
+
+cde job run --name wordcount-job
+You can then monitor the job in the CDE Console UI.
+
+✅ Part 2: Exploring Cloudera Data Warehouse (CDW)
+CDW is for interactive SQL queries and BI workloads (Impala, Hive LLAP).
+
+Steps to Use CDW:
+Step 1: Go to Data Warehouse in the CDS UI
+Click on Data Warehouse.
+
+Select/create a Database Catalog and Virtual Warehouse.
+
+Choose Impala or Hive as the engine.
+
+Name it something like my-vw.
+
+Step 2: Open Hue Interface
+After the Virtual Warehouse is running, click on Hue.
+
+Open the Query Editor and run SQL like:
+
+sql
+Copy
+Edit
+SHOW DATABASES;
+CREATE DATABASE IF NOT EXISTS test;
+USE test;
+
+CREATE TABLE sample_table (id INT, name STRING);
+INSERT INTO sample_table VALUES (1, 'Alice'), (2, 'Bob');
+SELECT * FROM sample_table;
+🧪 Sample Use Cases
+Use CDE for:
+
+Batch Spark processing
+
+ETL pipelines
+
+Scheduled Spark jobs
+
+Use CDW for:
+
+SQL-based analytics
+
+Data exploration
+
+BI tool integrations (e.g. Tableau)
+
+🔁 Want to Use Both Together?
+You can:
+
+Use CDE to process raw data (Spark)
+
+Store the results in Hive tables (in CDW)
+
+Query them later in CDW (Impala/Hive)
+
+📌 Next Steps
+Let me know if you'd like:
+
+Sample Spark-submit script with parameters
+
+Jupyter integration with CDE
+
+Integration with object storage like S3/HDFS
+
+Automating with CDE Workflows (Airflow)
+
+Would you like me to generate a complete working Spark job zip + upload script?
