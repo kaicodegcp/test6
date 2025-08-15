@@ -1,0 +1,58 @@
+---
+- name: Install Docker from Artifact Repository
+  hosts: all
+  become: true
+  gather_facts: yes
+
+  vars_files:
+    - vars/docker_artifact_vars.yml  # replace with your actual vars file
+
+  tasks:
+    - name: Create temp dir for Docker RPMs
+      file:
+        path: /tmp/docker_rpms
+        state: directory
+        mode: '0755'
+
+    - name: Download Docker RPMs from artifact repo
+      get_url:
+        url: "{{ ARTIFACT_INPUT }}/{{ SOURCE_DOCKER_PATH_INPUT }}/{{ item }}"
+        dest: "/tmp/docker_rpms/{{ item }}"
+        mode: '0644'
+        url_username: "{{ USER_INPUT }}"
+        url_password: "{{ PWD_INPUT }}"
+      loop:
+        - docker-ce-28.1.1-1.el8.x86_64.rpm
+        - docker-ce-cli-28.1.1-1.el8.x86_64.rpm
+        - docker-compose-plugin-2.26.1-1.el8.x86_64.rpm
+        - docker-buildx-plugin-0.14.1-1.el8.x86_64.rpm
+        - containerd.io-1.6.33-3.1.el8.x86_64.rpm
+
+    - name: Stop Docker if running
+      service:
+        name: docker
+        state: stopped
+      ignore_errors: true
+
+    - name: Install Docker RPMs
+      shell: "rpm -Uvh /tmp/docker_rpms/{{ item }}"
+      loop:
+        - containerd.io-1.6.33-3.1.el8.x86_64.rpm
+        - docker-ce-cli-28.1.1-1.el8.x86_64.rpm
+        - docker-ce-28.1.1-1.el8.x86_64.rpm
+        - docker-compose-plugin-2.26.1-1.el8.x86_64.rpm
+        - docker-buildx-plugin-0.14.1-1.el8.x86_64.rpm
+
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Verify Docker version
+      command: docker --version
+      register: docker_version
+
+    - name: Show Docker version
+      debug:
+        msg: "{{ docker_version.stdout }}"
