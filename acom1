@@ -1,0 +1,34 @@
+Description
+
+Accelerating OpenShift Onboarding with Automation:
+The EAP Strategic Solutions team successfully implemented Ansible-based automation to handle Docker installation from Citi’s internal Artifact Repository. This playbook, named cti_rhel_eapbigdata_bdeng_openshift_automation_deploy_eap_docker.yml, streamlines the setup of Docker and its dependencies across all SDLC environments—eliminating the need for manual steps or public YUM repositories.
+
+The automation ensures consistent and repeatable Docker setup on the CM Admin host and supporting nodes during Cloudera CDS installations on OpenShift, aligning with Citi's SDLC standards and security posture.
+
+Key Achievements:
+
+Developed a reusable Ansible playbook to install Docker, Docker CLI, Compose, Buildx, and containerd.io using RPMs from a secure artifact repo.
+
+Designed parameterized input for repo URLs and credentials, improving security and adaptability.
+
+Enabled hands-free deployment of Docker across multiple hosts and environments in one execution.
+
+Integrated automation with CDS OpenShift documentation for reference and reusability.
+
+Benefits to the Team:
+
+Accelerates OpenShift CDS pre-requisite setup by avoiding manual Docker configuration.
+
+Ensures consistency across CM Admin, worker nodes, and staging/prod clusters.
+
+Reduces risk of repo access issues by using pre-fetched artifact-based RPMs.
+
+Aligns with Citi’s secure software delivery practices and compliance mandates.
+
+Next Steps:
+
+Extend automation to support RHEL9+ Docker RPM variations if applicable.
+
+Integrate with CDS installation pipelines for end-to-end provisioning.
+
+Publish this role for cross-team reuse within Citi OpenShift enablement.
